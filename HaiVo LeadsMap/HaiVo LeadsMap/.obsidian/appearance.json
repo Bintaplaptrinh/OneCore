@@ -1,0 +1,8 @@
+{
+  "theme": "moonstone",
+  "enabledCssSnippets": [
+    "HaiVo_Colored Heading",
+    "latex",
+    "obsidian_theme_config"
+  ]
+}

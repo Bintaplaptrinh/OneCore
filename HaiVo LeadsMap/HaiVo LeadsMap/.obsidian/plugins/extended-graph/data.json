@@ -1,0 +1,21 @@
+{
+  "enableFeatures": {
+    "tags": true,
+    "links": true,
+    "images": true,
+    "focusNode": true,
+    "pinNode": true,
+    "properties": true
+  },
+  "imageProperty": "image",
+  "tagColors": {
+    "contact": "#4A90D9",
+    "company": "#E67E22",
+    "project": "#27AE60",
+    "developer": "#8E44AD",
+    "maincontractor": "#C0392B",
+    "consultant": "#F39C12",
+    "meeting": "#95A5A6",
+    "opportunity": "#3498DB"
+  }
+}

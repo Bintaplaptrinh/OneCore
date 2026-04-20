@@ -1,0 +1,334 @@
+{
+  "main": {
+    "id": "05c904edeae4cd86",
+    "type": "split",
+    "children": [
+      {
+        "id": "37c0af4f0a199aa8",
+        "type": "tabs",
+        "children": [
+          {
+            "id": "8e6f1222edc19a63",
+            "type": "leaf",
+            "state": {
+              "type": "markdown",
+              "state": {
+                "file": "1_project/2026 - [[prj-EatonPark]].md",
+                "mode": "source",
+                "source": false,
+                "backlinks": true,
+                "backlinkOpts": {
+                  "collapseAll": false,
+                  "extraContext": false,
+                  "sortOrder": "alphabetical",
+                  "showSearch": false,
+                  "searchQuery": "",
+                  "backlinkCollapsed": false,
+                  "unlinkedCollapsed": true
+                }
+              },
+              "icon": "lucide-file",
+              "title": "2026 - [[prj-EatonPark]]"
+            }
+          },
+          {
+            "id": "8834947d234871df",
+            "type": "leaf",
+            "state": {
+              "type": "graph",
+              "state": {},
+              "icon": "lucide-git-fork",
+              "title": "Xem biểu đồ"
+            }
+          }
+        ],
+        "currentTab": 1
+      }
+    ],
+    "direction": "vertical"
+  },
+  "left": {
+    "id": "bc19bfe59714c56c",
+    "type": "split",
+    "children": [
+      {
+        "id": "dad7bc183ee5c865",
+        "type": "tabs",
+        "children": [
+          {
+            "id": "16cfde3309ab6b42",
+            "type": "leaf",
+            "state": {
+              "type": "file-explorer",
+              "state": {
+                "sortOrder": "alphabetical",
+                "autoReveal": false
+              },
+              "icon": "lucide-folder-closed",
+              "title": "Trình duyệt tệp"
+            }
+          },
+          {
+            "id": "b5b7b1f15b7baccd",
+            "type": "leaf",
+            "state": {
+              "type": "search",
+              "state": {
+                "query": "",
+                "matchingCase": false,
+                "explainSearch": false,
+                "collapseAll": false,
+                "extraContext": false,
+                "sortOrder": "alphabetical"
+              },
+              "icon": "lucide-search",
+              "title": "Tìm kiếm"
+            }
+          },
+          {
+            "id": "5ee29bc67e089760",
+            "type": "leaf",
+            "state": {
+              "type": "bookmarks",
+              "state": {},
+              "icon": "lucide-bookmark",
+              "title": "Đánh dấu"
+            }
+          }
+        ]
+      }
+    ],
+    "direction": "horizontal",
+    "width": 300
+  },
+  "right": {
+    "id": "a40b8c6d8447cd52",
+    "type": "split",
+    "children": [
+      {
+        "id": "986089b109ade433",
+        "type": "tabs",
+        "children": [
+          {
+            "id": "aef300bf1c7f8efb",
+            "type": "leaf",
+            "state": {
+              "type": "backlink",
+              "state": {
+                "file": "_dashboard/Relationship Map.md",
+                "collapseAll": false,
+                "extraContext": false,
+                "sortOrder": "alphabetical",
+                "showSearch": false,
+                "searchQuery": "",
+                "backlinkCollapsed": false,
+                "unlinkedCollapsed": true
+              },
+              "icon": "links-coming-in",
+              "title": "Liên kết đến của Relationship Map"
+            }
+          },
+          {
+            "id": "6a4602536e1c1207",
+            "type": "leaf",
+            "state": {
+              "type": "outgoing-link",
+              "state": {
+                "file": "3_company/clients/[[client-Capitaland]].md",
+                "linksCollapsed": false,
+                "unlinkedCollapsed": true
+              },
+              "icon": "links-going-out",
+              "title": "Liên kết đi ra từ [[client-Capitaland]]"
+            }
+          },
+          {
+            "id": "064e7883f944d24c",
+            "type": "leaf",
+            "state": {
+              "type": "tag",
+              "state": {
+                "sortOrder": "frequency",
+                "useHierarchy": true,
+                "showSearch": false,
+                "searchQuery": ""
+              },
+              "icon": "lucide-tags",
+              "title": "Thẻ"
+            }
+          },
+          {
+            "id": "950a5eb3bd8a780d",
+            "type": "leaf",
+            "state": {
+              "type": "all-properties",
+              "state": {
+                "sortOrder": "frequency",
+                "showSearch": false,
+                "searchQuery": ""
+              },
+              "icon": "lucide-archive",
+              "title": "Tất cả thuộc tính"
+            }
+          },
+          {
+            "id": "f30731f633593ad5",
+            "type": "leaf",
+            "state": {
+              "type": "outline",
+              "state": {
+                "file": "_dashboard/Relationship Map.md",
+                "followCursor": false,
+                "showSearch": false,
+                "searchQuery": ""
+              },
+              "icon": "lucide-list",
+              "title": "Đề cương của Relationship Map"
+            }
+          },
+          {
+            "id": "38ad68af6636687b",
+            "type": "leaf",
+            "state": {
+              "type": "juggl_nodes",
+              "state": {},
+              "icon": "lucide-ghost",
+              "title": "juggl_nodes"
+            }
+          },
+          {
+            "id": "85bd75a57fa049a9",
+            "type": "leaf",
+            "state": {
+              "type": "juggl_style",
+              "state": {},
+              "icon": "lucide-ghost",
+              "title": "juggl_style"
+            }
+          },
+          {
+            "id": "17418ec3aa27e148",
+            "type": "leaf",
+            "state": {
+              "type": "crm-sidebar",
+              "state": {},
+              "icon": "lucide-ghost",
+              "title": "crm-sidebar"
+            }
+          },
+          {
+            "id": "83870f76385ec17d",
+            "type": "leaf",
+            "state": {
+              "type": "juggl_nodes",
+              "state": {},
+              "icon": "lucide-ghost",
+              "title": "juggl_nodes"
+            }
+          },
+          {
+            "id": "b18eb54dec73f192",
+            "type": "leaf",
+            "state": {
+              "type": "juggl_style",
+              "state": {},
+              "icon": "lucide-ghost",
+              "title": "juggl_style"
+            }
+          },
+          {
+            "id": "d63233c80b952fe7",
+            "type": "leaf",
+            "state": {
+              "type": "juggl_nodes",
+              "state": {},
+              "icon": "ag-node-list",
+              "title": "Juggl nodes"
+            }
+          },
+          {
+            "id": "f746c244e5544f79",
+            "type": "leaf",
+            "state": {
+              "type": "juggl_style",
+              "state": {},
+              "icon": "ag-style",
+              "title": "Juggl style"
+            }
+          }
+        ],
+        "currentTab": 7
+      }
+    ],
+    "direction": "horizontal",
+    "width": 300,
+    "collapsed": true
+  },
+  "left-ribbon": {
+    "hiddenItems": {
+      "switcher:Mở bộ chuyển đổi nhanh": false,
+      "graph:Mở xem biểu đồ": false,
+      "canvas:Tạo bảng mới": false,
+      "daily-notes:Mở ghi chú hôm nay": false,
+      "templates:Chèn mẫu": false,
+      "command-palette:Mở khay lệnh": false,
+      "markdown-importer:Mở trình chuyển đổi Markdown": false,
+      "workspaces:Quản lý cấu trúc khung làm việc": false,
+      "publish:Xuất bản các thay đổi...": false,
+      "bases:Tạo cơ sở mới": false,
+      "templater-obsidian:Templater": false,
+      "obsidian-crm:CRM": false,
+      "obsidian-crm:CRM Calendar": false,
+      "juggl:Juggl global graph": false
+    }
+  },
+  "active": "8834947d234871df",
+  "lastOpenFiles": [
+    "4_company/design/[[consultant-Arup]].md",
+    "4_company/clients/[[client-Capitaland]].md",
+    "1_project/2026 - [[prj-CT1-CT2-TimeSquareDanang]].md",
+    "2_contacts/andy tay_ips securex pte.md",
+    "3_namecards/ctd - manh nguyen_mep technical & tendering.jpg",
+    "3_namecards/Bùi Thị Cẩm Nhung_Toàn Cầu Group.png",
+    "3_namecards/binghua tang_park idea.jpg",
+    "3_namecards/a khoa akt_trandangkhoa.jpg",
+    "0_dashboard/Project Matrix.md",
+    "0_dashboard/Graph Workspace.md",
+    "2_contacts/Vo-Tien-Dung_PhuocThanh.md",
+    "Settings/Templates_HaiVo/contact.md",
+    "Settings/Templates/Project Template.md",
+    "Settings/Templates/Opportunity Template.md",
+    "Settings/Templates/Meeting Template.md",
+    "Settings/Templates/Contact Template.md",
+    "2_contacts/Andy Yang_Tiandy Technologies.md",
+    "4_company/mc/mc-Coteccons.md",
+    "4_company/design/[[consultant-Aurecon]].md",
+    "2_contacts/Anna Nguyen_Kings Luxury Concepts.md",
+    "2_contacts/Anh Quang Queen Hotel_Anh Quang Queen Hotel.md",
+    "1_project/2026 - [[prj-OneEra]].md",
+    "1_project/2026 - [[prj-NguyenVietHongApartment]].md",
+    "1_project/2026 - [[prj-Lumi Hanoi]].md",
+    "1_project/2026 - [[prj-LancasterLegacy]].md",
+    "1_project/2026 - [[prj-HH01-TrungVan]].md",
+    "1_project/2026 - [[prj-EatonPark]].md",
+    "0_dashboard/Extended Graph Guide.md",
+    "0_dashboard/Contacts by Company.md",
+    "0_dashboard/Company Network.md",
+    "3_namecards/Chotchai Charoenngam_Rail Technology Research and Development Agency.png",
+    "3_namecards/bui nguyen huy_01_2024, 21_51 microsoft lens.jpg",
+    "3_namecards/Anna Nguyen_Kings Luxury Concepts.jpeg",
+    "3_namecards/Anh Quang Queen Hotel_Anh Quang Queen Hotel.jpg",
+    "3_namecards/andy tay_ips securex pte.jpg",
+    "3_namecards/A Quang_Kajima.jpg",
+    "3_namecards/Đặng Duy Hợp_Chip Sáng.pdf",
+    "1_project/~$TotalParking_Danh sach du an_260315_updated.xlsx",
+    "1_project/ECC25A00",
+    "1_project/~$TotalParking_Danh sach du an_260315.xlsx",
+    "1_project/TotalParking_Danh sach du an_260315_updated.xlsx",
+    "1_project/update_parking_data.py",
+    "1_project/temp_data.txt",
+    "1_project/TotalParking_Danh sach du an_260315.xlsx",
+    "Settings/Templates_HaiVo",
+    "4_company/prjmgnt"
+  ]
+}

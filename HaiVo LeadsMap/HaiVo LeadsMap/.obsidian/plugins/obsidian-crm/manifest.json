@@ -1,0 +1,11 @@
+{
+	"id": "obsidian-crm",
+	"name": "Obsidian CRM",
+	"version": "1.1.0",
+	"minAppVersion": "0.15.0",
+	"description": "A comprehensive CRM plugin for Obsidian with AI-powered meeting summaries, task management, and contact organization using LLM integration. Requires Datacore plugin.",
+	"author": "Antonin Bruneau",
+	"authorUrl": "https://github.com/abruneau",
+	"fundingUrl": "https://github.com/sponsors/abruneau",
+	"isDesktopOnly": false
+}
