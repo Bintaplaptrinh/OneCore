@@ -1,4 +1,4 @@
-const API = process.env.NEXT_PUBLIC_API_URL || "http://127.0.0.1:8000";
+const API = process.env.NEXT_PUBLIC_API_URL || "";
 
 type CacheEntry<T> = {
   expiresAt: number;
@@ -105,7 +105,8 @@ export interface SaveTableChangesResponse {
 }
 
 function buildUrl(path: string, params?: Record<string, string | number | undefined>): string {
-  const url = new URL(`${API}${path}`);
+  const base = API || (typeof window !== "undefined" ? window.location.origin : "http://localhost:3000");
+  const url = new URL(`${base}${path}`);
   if (params) {
     Object.entries(params).forEach(([k, v]) => {
       if (v !== undefined && v !== null && v !== "") url.searchParams.set(k, String(v));
@@ -219,7 +220,7 @@ export const api = {
     });
   },
   exportExcel: (params?: Record<string, string>) => {
-    const url = new URL(`${API}/api/export/excel`);
+    const url = new URL(buildUrl("/api/export/excel"));
     if (params) Object.entries(params).forEach(([k, v]) => v && url.searchParams.set(k, v));
     window.open(url.toString(), "_blank");
   },

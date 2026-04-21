@@ -36,17 +36,19 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   // first render already carries the correct value. During SSR `window` is
   // undefined, so we fall back to "light" — the inline <head> script (below)
   // then fixes the <html> class before hydration to prevent a flash.
-  const [theme, setTheme] = useState<"light" | "dark">(() => {
-    if (typeof window === "undefined") return "light";
-    const saved = window.localStorage.getItem("leadsmap_theme");
-    if (saved === "dark" || saved === "light") return saved;
-    if (window.matchMedia?.("(prefers-color-scheme: dark)").matches) return "dark";
-    return "light";
-  });
+  const [theme, setTheme] = useState<"light" | "dark">("light");
   const isFirstThemeEffect = useRef(true);
 
   useEffect(() => {
     setMounted(true);
+
+    // Keep first hydrated render deterministic (light), then sync persisted theme.
+    const saved = window.localStorage.getItem("leadsmap_theme");
+    if (saved === "dark" || saved === "light") {
+      setTheme(saved);
+    } else if (window.matchMedia?.("(prefers-color-scheme: dark)").matches) {
+      setTheme("dark");
+    }
 
     // Listen for theme changes from other tabs/components (e.g. Settings page).
     const onStorage = (e: StorageEvent) => {
@@ -84,9 +86,10 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
 
   const width = collapsed ? 56 : 220;
   const marginLeft = collapsed ? 56 : 220;
-  const sidebarBackground = theme === "dark" ? "rgba(17,27,45,0.92)" : "rgba(243,247,251,0.95)";
-  const sidebarShadow = theme === "dark" ? "2px 0 24px rgba(0,0,0,0.34)" : "2px 0 20px rgba(0,88,186,0.08)";
-  const sidebarDivider = theme === "dark" ? "1px solid rgba(143,161,187,0.2)" : "1px solid rgba(0,88,186,0.08)";
+  const effectiveTheme = mounted ? theme : "light";
+  const sidebarBackground = effectiveTheme === "dark" ? "rgba(17,27,45,0.92)" : "rgba(243,247,251,0.95)";
+  const sidebarShadow = effectiveTheme === "dark" ? "2px 0 24px rgba(0,0,0,0.34)" : "2px 0 20px rgba(0,88,186,0.08)";
+  const sidebarDivider = effectiveTheme === "dark" ? "1px solid rgba(143,161,187,0.2)" : "1px solid rgba(0,88,186,0.08)";
 
   return (
     <html lang="vi" className={theme === "dark" ? "dark" : "light"} suppressHydrationWarning>
