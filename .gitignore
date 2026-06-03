@@ -26,11 +26,18 @@ Thumbs.db
 **/.cache/
 **/cache/
 
+# Runtime-generated exports
+app/backend/reports/*
+!app/backend/reports/.gitkeep
+
 # Local environment files
 .env
 .env.*
+!.env.example
+!**/.env.example
 
 # User-requested folders to keep out of git
 llm-checker/
 llm-wiki/
 LeadsMap_Input Information/
+HaiVo LeadsMap/

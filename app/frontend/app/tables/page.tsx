@@ -1,9 +1,10 @@
 "use client";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { api, FieldDef, Stats } from "@/lib/api";
+import UploadPage from "../upload/page";
 import {
   Table2, GripVertical, X, Download, FileSpreadsheet,
-  RefreshCw, Plus, Sparkles, Trash2, Save,
+  RefreshCw, Plus, Sparkles, Trash2, Save, Upload,
 } from "lucide-react";
 
 const TEMPLATES: { id: string; name: string; emoji: string; source: "projects"|"contacts"; columns: string[]; filters: Record<string,string> }[] = [
@@ -61,10 +62,11 @@ function rowVal(row: Record<string, any>, key: string): string {
 }
 
 export default function TablesPage() {
+  const [activeMode, setActiveMode]         = useState<"table"|"upload">("table");
   const [source, setSource]               = useState<"projects"|"contacts">("projects");
   const [selectedCols, setSelectedCols]   = useState<string[]>(DEFAULT_PROJECT_COLS);
   const [filters, setFilters]             = useState<Record<string,string>>({});
-  const [title, setTitle]                 = useState("LeadsMap Export");
+  const [title, setTitle]                 = useState("CoreOne Export");
   const [previewData, setPreviewData]     = useState<Record<string,any>[]>([]);
   const [previewTotal, setPreviewTotal]   = useState(0);
   const [previewLoading, setPreviewLoading] = useState(false);
@@ -84,6 +86,16 @@ export default function TablesPage() {
   const timerRef = useRef<any>(null);
 
   const allFields = source === "contacts" ? CONTACT_FIELDS : PROJECT_FIELDS;
+
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    if (params.get("mode") === "upload") setActiveMode("upload");
+  }, []);
+
+  function switchMode(nextMode: "table"|"upload") {
+    setActiveMode(nextMode);
+    window.history.replaceState(null, "", nextMode === "upload" ? "/tables?mode=upload" : "/tables");
+  }
 
   useEffect(() => {
     const raw = localStorage.getItem("leadsmap_pending_table");
@@ -349,26 +361,42 @@ export default function TablesPage() {
   }, [currentPage]);
 
   return (
-    <div className="px-6 py-6 min-h-screen">
+    <div className={`px-6 py-6 min-h-screen data-manager-page ${activeMode === "upload" ? "is-upload-mode" : "is-table-mode"}`}>
       {/* Header */}
       <div className="mb-5 flex items-center justify-between">
         <div>
           <h1 className="text-[20px] font-bold text-text flex items-center gap-2">
-            <Table2 size={20} className="text-accent" /> Table Builder
+            <Table2 size={20} className="text-accent" /> Data Manager
           </h1>
-          <p className="text-[12px] text-text2 mt-0.5">Tạo bảng tùy chỉnh · kéo thả cột · xuất Excel ngay</p>
+          <p className="text-[12px] text-text2 mt-0.5">Manage supporter data, custom tables, uploads, and exports.</p>
         </div>
-        <button onClick={() => {
-          setSelectedCols(source === "contacts" ? DEFAULT_CONTACT_COLS : DEFAULT_PROJECT_COLS);
-          setFilters({});
-          setTitle("LeadsMap Export");
-          setPendingTable(null);
-          setCurrentPage(1);
-        }}
-          className="btn btn-ghost gap-1.5 text-xs">
-          <RefreshCw size={13} /> Đặt lại
-        </button>
+        <div className="flex items-center gap-2">
+          <div className="data-manager-mode-tabs" aria-label="Data Manager mode">
+            <button type="button" className={activeMode === "table" ? "is-active" : ""} onClick={() => switchMode("table")}>
+              <Table2 size={13} /> Tables
+            </button>
+            <button type="button" className={activeMode === "upload" ? "is-active" : ""} onClick={() => switchMode("upload")}>
+              <Upload size={13} /> Upload
+            </button>
+          </div>
+          {activeMode === "table" && (
+            <button onClick={() => {
+              setSelectedCols(source === "contacts" ? DEFAULT_CONTACT_COLS : DEFAULT_PROJECT_COLS);
+              setFilters({});
+              setTitle("CoreOne Export");
+              setPendingTable(null);
+              setCurrentPage(1);
+            }}
+              className="btn btn-ghost gap-1.5 text-xs">
+              <RefreshCw size={13} /> Đặt lại
+            </button>
+          )}
+        </div>
       </div>
+
+      {activeMode === "upload" && <UploadPage />}
+
+      <div className="data-manager-table-content">
 
       {/* Pending AI table */}
       {pendingTable && (
@@ -519,7 +547,7 @@ export default function TablesPage() {
           <div className="card">
             <label className="text-[10px] text-text2 uppercase tracking-widest mb-2 block">Tên file xuất</label>
             <input className="input text-xs py-1.5 h-8" value={title}
-              onChange={e => setTitle(e.target.value)} placeholder="LeadsMap Export" />
+              onChange={e => setTitle(e.target.value)} placeholder="CoreOne Export" />
           </div>
         </div>
 
@@ -684,6 +712,7 @@ export default function TablesPage() {
             )}
           </div>
         </div>
+      </div>
       </div>
     </div>
   );

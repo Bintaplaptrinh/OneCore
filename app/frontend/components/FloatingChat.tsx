@@ -211,7 +211,7 @@ function MessageBubble({
                   onClick={() =>
                     onExcelExport(
                       msg.tableData!,
-                      `LeadsMap_${msg.tableData!.headers[0] ?? "Table"}`
+                      `CoreOne_${msg.tableData!.headers[0] ?? "Table"}`
                     )
                   }
                   className="flex items-center gap-1 text-xs px-2.5 py-1 rounded-lg border border-[var(--border)] text-[var(--text2)] hover:text-[var(--text)] hover:border-[#6366F1] transition-colors"
@@ -224,7 +224,7 @@ function MessageBubble({
                   className="flex items-center gap-1 text-xs px-2.5 py-1 rounded-lg border border-[var(--border)] text-[var(--text2)] hover:text-[var(--text)] hover:border-[#6366F1] transition-colors"
                 >
                   <Table2 size={12} />
-                  Mở Table Builder
+                  Mở Data Manager
                 </button>
               </>
             )}
@@ -465,7 +465,7 @@ export default function FloatingChat() {
                   Chat AI
                 </p>
                 <p className="text-xs text-[var(--text2)] mt-0.5 leading-none">
-                  LeadsMap Intelligence
+                  CoreOne Assistant
                 </p>
               </div>
               <button

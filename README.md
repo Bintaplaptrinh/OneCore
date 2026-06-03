@@ -1,40 +1,56 @@
-# HaiVo LeadsMap - Windows Quick Start
+# Bintaplaptrinh CoreOne
 
-This repository includes one-click batch scripts for clone-and-run on a new Windows machine.
+Bintaplaptrinh CoreOne is a supporter management app for project/contact intelligence, data management, graph exploration, AI chat, and professional Vietnamese Report & Analyst exports.
 
-## Script List
+## Features
 
-1. `1_check_machine.bat`
-- Checks required tools: Git, Python, Node.js, npm, PowerShell.
-- Auto-creates `app/backend/.env` from `app/backend/.env.example` if missing.
-- Auto-creates `app/frontend/.env.local` if missing.
+- Data Manager for uploads, table building, and structured supporter data.
+- Chat AI for assistant workflows, analysis, and data-aware actions.
+- Reports with AI-written HTML, visual charts, and PDF export.
+- Graph and contact views for relationship exploration.
+- Light-first dashboard UI with the Bintaplaptrinh brand.
 
-2. `2_run_all_local.bat`
-- Runs machine check.
-- Creates Python virtual environment in `app/backend/.venv` if missing.
-- Installs backend dependencies from `app/backend/requirements.txt`.
-- Installs frontend dependencies if `app/frontend/node_modules` is missing.
-- Starts backend and frontend in separate terminal windows.
+## Project Structure
 
-3. `3_run_all_with_tunnel.bat`
-- Same setup as local run.
-- Starts backend.
-- Creates a public tunnel URL for frontend port `3000`.
-	- Uses `cloudflared` if installed.
-	- Falls back to `npx localtunnel`.
-- Starts frontend with `NEXT_PUBLIC_API_URL` mapped to tunnel URL.
-- Opens the public URL in browser so you can share it with clients.
+- `app/frontend` - Next.js web app.
+- `app/backend` - FastAPI API, data layer, report generation, and AI routes.
+- `awesome_agent_skills` - local skill references used to guide agent/report behavior.
+- `1_check_machine.bat` - validates local Windows dependencies and creates env files.
+- `2_run_all_local.bat` - starts backend and frontend locally.
 
-## How to Use on a New Machine
+## Local Setup
 
-1. Clone repository.
-2. Double click `1_check_machine.bat`.
-3. If all checks pass, run either:
-- `2_run_all_local.bat` for local usage.
-- `3_run_all_with_tunnel.bat` for sharing demo via internet.
+1. Install Git, Python, Node.js, npm, and MongoDB.
+2. Copy environment examples if the scripts have not created them yet:
+   - `app/backend/.env.example` to `app/backend/.env`
+   - `app/frontend/.env.example` to `app/frontend/.env.local`
+3. Run `1_check_machine.bat`.
+4. Run `2_run_all_local.bat`.
 
-## Notes
+## Manual Run
 
-- Stop backend/frontend by closing their spawned terminal windows.
-- Tunnel process runs in background. If needed, stop it by PID from `%TEMP%\\leadsmap_tunnel.pid`.
-- For production usage, update secrets in `app/backend/.env`.
+Backend:
+
+```powershell
+cd app/backend
+python -m venv .venv
+.\.venv\Scripts\Activate.ps1
+pip install -r requirements.txt
+python -m uvicorn main:app --host 0.0.0.0 --port 8000 --reload
+```
+
+Frontend:
+
+```powershell
+cd app/frontend
+npm install
+npm run dev
+```
+
+Open the app at `http://localhost:3000`. The backend runs at `http://localhost:8000`.
+
+## Repository Notes
+
+- Runtime report exports are generated under `app/backend/reports` and ignored by git.
+- Local secrets and environment files are ignored. Keep production keys out of the repository.
+- Legacy vault/data folders are intentionally excluded from this code repo.

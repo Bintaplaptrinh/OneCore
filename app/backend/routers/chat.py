@@ -12,7 +12,9 @@ from core.database import (
     save_query_log,
 )
 from core.rag_engine import get_rag_engine
+from core.report_agent import generate_agent_report
 from fastapi import APIRouter, HTTPException
+from unidecode import unidecode
 
 router = APIRouter()
 
@@ -53,6 +55,17 @@ class PendingMutation(BaseModel):
     summary: str = ""
 
 
+class GeneratedReport(BaseModel):
+    """Generated report payload for Chat AI."""
+
+    id: str = ""
+    title: str = ""
+    summary: str = ""
+    html: str = ""
+    charts: list[dict] = []
+    download_url: str = ""
+
+
 class ChatResponse(BaseModel):
     """Chat response model."""
 
@@ -61,6 +74,7 @@ class ChatResponse(BaseModel):
     context_used: int
     graph_filter: GraphFilter | None = None
     pending_mutation: PendingMutation | None = None
+    report: GeneratedReport | None = None
 
 
 class ChatSessionUpsertRequest(BaseModel):
@@ -98,10 +112,51 @@ def _map_citations(raw: list[dict]) -> list[Citation]:
     return mapped
 
 
+def _is_report_query(query: str) -> bool:
+    q = unidecode(str(query or "").lower())
+    triggers = [
+        "bao cao",
+        "report",
+        "analyst",
+        "analysis",
+        "phan tich",
+        "dashboard insight",
+        "nhan dinh",
+    ]
+    return any(trigger in q for trigger in triggers)
+
+
 @router.post("/chat", response_model=ChatResponse)
 async def chat(req: ChatRequest):
     """Chat endpoint with RAG engine."""
     try:
+        if _is_report_query(req.query):
+            report = await generate_agent_report(query=req.query, language="vi")
+            generated_report = GeneratedReport(
+                id=str(report.get("id") or ""),
+                title=str(report.get("title") or ""),
+                summary=str(report.get("summary") or ""),
+                html=str(report.get("html") or ""),
+                charts=report.get("charts") or [],
+                download_url=str(report.get("download_url") or ""),
+            )
+            answer = (
+                f"Đã tạo **{generated_report.title}** bằng Agent phân tích.\n\n"
+                f"{generated_report.summary}\n\n"
+                "Bạn có thể xem bản HTML ngay trong Chat AI hoặc tải bản PDF từ thẻ báo cáo bên dưới."
+            )
+            try:
+                await save_query_log(query=req.query, answer=answer, intent="report")
+            except Exception:
+                pass
+            return ChatResponse(
+                answer=answer,
+                citations=[Citation(name="CoreOne Report Agent", type="report", slug=generated_report.id)],
+                context_used=1,
+                graph_filter=GraphFilter(),
+                report=generated_report,
+            )
+
         engine = get_rag_engine()
         payload = await engine.answer(
             req.query,

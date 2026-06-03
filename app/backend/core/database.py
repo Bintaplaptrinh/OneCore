@@ -1550,3 +1550,19 @@ async def get_reports() -> list[dict]:
     except Exception as e:
         print(f"[get_reports] Error: {e}")
         return []
+
+
+async def get_report(report_id: str) -> dict | None:
+    """Get a single saved report by id."""
+    db = await get_db()
+    try:
+        query: dict = {"_id": report_id}
+        try:
+            query = {"_id": ObjectId(report_id)}
+        except Exception:
+            pass
+        doc = await db["reports"].find_one(query)
+        return _serialize_doc(doc) if doc else None
+    except Exception as e:
+        print(f"[get_report] Error: {e}")
+        return None

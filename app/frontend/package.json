@@ -1,5 +1,5 @@
 {
-  "name": "haivo-leadsmap",
+  "name": "bintaplaptrinh-coreone",
   "version": "1.0.0",
   "private": true,
   "scripts": {
@@ -16,7 +16,7 @@
     "clsx": "^2.1.1",
     "framer-motion": "^11.5.4",
     "lucide-react": "^0.447.0",
-    "next": "14.2.5",
+    "next": "^15.5.18",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
     "react-force-graph-2d": "^1.29.1",
@@ -32,8 +32,12 @@
     "@types/react-dom": "^18.3.0",
     "@types/three": "^0.167.0",
     "autoprefixer": "^10.4.20",
-    "postcss": "^8.4.45",
     "tailwindcss": "^3.4.11",
     "typescript": "^5.5.4"
+  },
+  "overrides": {
+    "next": {
+      "postcss": "8.5.10"
+    }
   }
 }

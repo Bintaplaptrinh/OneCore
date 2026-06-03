@@ -5,7 +5,7 @@ cd /d "%~dp0"
 set "HAS_ERROR=0"
 
 echo ================================================
-echo LeadsMap machine check
+echo CoreOne machine check
 echo ================================================
 echo.
 

@@ -121,7 +121,7 @@ export default function Settings() {
         <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
           {[
             ["Phiên bản", `v${APP_VERSION}`],
-            ["Sản phẩm", "Leadmap web app"],
+            ["Sản phẩm", "Bintaplaptrinh CoreOne"],
           ].map(([k, v]) => (
             <div
               key={k}

@@ -1,57 +1,102 @@
 "use client";
-import { useEffect, useState } from "react";
-import { api, Report } from "@/lib/api";
+
+import { useEffect, useMemo, useState } from "react";
+import { api, AgentReport, Report } from "@/lib/api";
+import ReportHtmlViewer from "@/components/ReportHtmlViewer";
 import {
-  FileText, Download, RefreshCw, Search, FileSpreadsheet,
-  Clock, MessageSquare, FileCode,
+  BarChart3,
+  Download,
+  Eye,
+  FileText,
+  Loader2,
+  RefreshCw,
+  Search,
+  Sparkles,
 } from "lucide-react";
 
-function ReportIcon({ title }: { title: string }) {
-  if (title.startsWith("Tóm tắt:")) return <FileCode size={18} className="text-accent" />;
-  return <FileSpreadsheet size={18} className="text-[#10B981]" />;
-}
+const DEFAULT_PROMPT =
+  "Tạo báo cáo phân tích tổng quan bằng tiếng Việt cho Bintaplaptrinh CoreOne, gồm insight về dự án, liên hệ, khu vực, giá trị và khuyến nghị hành động.";
 
 function formatDate(ts: string) {
   if (!ts) return "";
   return ts.slice(0, 16).replace("T", " ");
 }
 
-function ReportCard({ r, onDownload }: { r: Report; onDownload: () => void }) {
-  const isMarkdown = r.file_path?.endsWith(".md");
+function reportKindLabel(report: Report) {
+  if (report.kind === "html" || report.html_available) return "HTML + PDF";
+  if (report.kind === "pdf") return "PDF";
+  return "Excel";
+}
+
+function toReport(report: AgentReport, query: string): Report {
+  return {
+    id: report.id,
+    title: report.title,
+    file_path: "",
+    query,
+    timestamp: new Date().toISOString(),
+    kind: "html",
+    html_available: true,
+    html: report.html,
+    charts: report.charts,
+  };
+}
+
+function ReportCard({
+  report,
+  active,
+  onPreview,
+}: {
+  report: Report;
+  active: boolean;
+  onPreview: () => void;
+}) {
+  const canPreview = !!report.html_available || !!report.html;
+
   return (
-    <div className="card hover:border-accent/30 transition-all duration-200 flex flex-col gap-2">
-      {/* Icon + title */}
+    <div
+      className={`rounded-lg border bg-[var(--surface-container)] p-4 shadow-sm transition-all duration-200 ${
+        active ? "border-accent shadow-accent/10" : "border-border hover:border-accent/35"
+      }`}
+    >
       <div className="flex items-start gap-3">
-        <div className="w-9 h-9 rounded-lg flex items-center justify-center bg-surface flex-shrink-0 mt-0.5">
-          <ReportIcon title={r.title} />
+        <div className="w-9 h-9 rounded-lg flex items-center justify-center bg-accent/10 flex-shrink-0">
+          <FileText size={17} className="text-accent" />
         </div>
-        <div className="flex-1 min-w-0">
-          <p className="text-sm font-medium text-text leading-snug line-clamp-2">{r.title}</p>
-          <div className="flex items-center gap-1.5 mt-0.5">
-            <Clock size={10} className="text-text2" />
-            <span className="text-[10px] text-text2">{formatDate(r.timestamp)}</span>
+        <div className="min-w-0 flex-1">
+          <p className="text-sm font-bold text-text leading-snug line-clamp-2">{report.title}</p>
+          <div className="mt-1 flex flex-wrap items-center gap-2 text-[10px] text-text2">
+            <span>{formatDate(report.timestamp)}</span>
+            <span className="rounded bg-accent/10 px-1.5 py-0.5 text-accent">{reportKindLabel(report)}</span>
           </div>
         </div>
       </div>
 
-      {/* Query that generated it */}
-      {r.query && !r.query.startsWith("summary:") && (
-        <div className="flex items-start gap-1.5 px-2 py-1.5 rounded-md bg-[var(--surface-container-low)] border border-border">
-          <MessageSquare size={10} className="text-text2 mt-0.5 flex-shrink-0" />
-          <p className="text-[11px] text-text2 line-clamp-2 leading-snug">{r.query}</p>
-        </div>
+      {report.query && !report.query.startsWith("summary:") && (
+        <p className="mt-3 rounded-md border border-border bg-[var(--surface-container-low)] px-2.5 py-2 text-[11px] leading-relaxed text-text2 line-clamp-3">
+          {report.query}
+        </p>
       )}
 
-      {/* Download */}
-      <button
-        onClick={onDownload}
-        className="btn btn-ghost w-full text-xs py-1.5 mt-auto"
-        disabled={isMarkdown}
-        title={isMarkdown ? "Báo cáo dạng văn bản (không tải được)" : "Tải về"}
-      >
-        <Download size={12} />
-        {isMarkdown ? "Báo cáo văn bản" : "Tải lại Excel"}
-      </button>
+      <div className="mt-3 flex gap-2">
+        <button
+          type="button"
+          onClick={onPreview}
+          disabled={!canPreview}
+          className="btn btn-ghost flex-1 text-xs py-1.5"
+          title={canPreview ? "Xem trước báo cáo HTML" : "Báo cáo này không có bản HTML"}
+        >
+          <Eye size={12} /> Preview
+        </button>
+        <a
+          className="btn btn-primary flex-1 text-xs py-1.5"
+          href={api.reportDownloadUrl(report.id)}
+          target="_blank"
+          rel="noreferrer"
+        >
+          <Download size={12} /> PDF
+        </a>
+      </div>
     </div>
   );
 }
@@ -59,84 +104,191 @@ function ReportCard({ r, onDownload }: { r: Report; onDownload: () => void }) {
 export default function ReportsPage() {
   const [reports, setReports] = useState<Report[]>([]);
   const [loading, setLoading] = useState(true);
-  const [search, setSearch]   = useState("");
+  const [creating, setCreating] = useState(false);
+  const [previewLoading, setPreviewLoading] = useState(false);
+  const [search, setSearch] = useState("");
+  const [query, setQuery] = useState(DEFAULT_PROMPT);
+  const [selected, setSelected] = useState<Report | null>(null);
+  const [selectedHtml, setSelectedHtml] = useState("");
 
   function load() {
     setLoading(true);
-    api.reports()
-      .then(r => setReports(r.data))
+    api
+      .reports()
+      .then((res) => {
+        const next = res.data || [];
+        setReports(next);
+        if (!selected && next.length > 0) {
+          void openReport(next[0]);
+        }
+      })
       .catch(() => setReports([]))
       .finally(() => setLoading(false));
   }
 
-  useEffect(() => { load(); }, []);
+  useEffect(() => {
+    load();
+  }, []);
 
-  const filtered = reports.filter(r =>
-    r.title.toLowerCase().includes(search.toLowerCase()) ||
-    (r.query || "").toLowerCase().includes(search.toLowerCase())
-  );
+  const filtered = useMemo(() => {
+    const needle = search.trim().toLowerCase();
+    if (!needle) return reports;
+    return reports.filter(
+      (report) =>
+        report.title.toLowerCase().includes(needle) ||
+        (report.query || "").toLowerCase().includes(needle)
+    );
+  }, [reports, search]);
+
+  async function openReport(report: Report) {
+    setSelected(report);
+    setPreviewLoading(true);
+    try {
+      if (report.html) {
+        setSelectedHtml(report.html);
+      } else if (report.html_available) {
+        const res = await api.reportHtml(report.id);
+        setSelectedHtml(res.html || "");
+      } else {
+        setSelectedHtml("");
+      }
+    } catch {
+      setSelectedHtml("");
+    } finally {
+      setPreviewLoading(false);
+    }
+  }
+
+  async function generateReport() {
+    const prompt = query.trim() || DEFAULT_PROMPT;
+    setCreating(true);
+    try {
+      const res = await api.createAgentReport(prompt, "vi");
+      const report = res.report;
+      if (!report) return;
+      const nextReport = toReport(report, prompt);
+      setReports((current) => [nextReport, ...current.filter((item) => item.id !== nextReport.id)]);
+      setSelected(nextReport);
+      setSelectedHtml(report.html);
+    } finally {
+      setCreating(false);
+    }
+  }
+
+  const selectedCharts = selected?.charts || [];
 
   return (
     <div className="min-h-screen bg-bg px-8 py-8">
-      {/* Header */}
-      <div className="flex items-center justify-between mb-6">
+      <div className="mb-6 flex flex-col gap-4 xl:flex-row xl:items-end xl:justify-between">
         <div className="flex items-center gap-3">
-          <div className="w-9 h-9 rounded-xl flex items-center justify-center bg-gradient-to-br from-accent to-violet-500 shadow-lg shadow-accent/30">
-            <FileText size={18} color="white" />
-          </div>
           <div>
-            <h1 className="text-xl font-bold text-text">Kho Báo cáo</h1>
+            <h1 className="text-xl font-bold text-text">Report & Analyst</h1>
             <p className="text-xs text-text2">
-              {reports.length} báo cáo đã lưu — Excel từ Chat AI · Tạo báo cáo: Coming soon
+              Agent tạo báo cáo HTML, hiển thị biểu đồ và xuất PDF. Ngôn ngữ mặc định: Tiếng Việt.
             </p>
           </div>
         </div>
-        <button onClick={load} className="btn btn-ghost text-xs py-1.5 px-3" title="Làm mới">
-          <RefreshCw size={13} className={loading ? "animate-spin" : ""} /> Làm mới
+
+        <button onClick={load} className="btn btn-ghost text-xs py-1.5 px-3 w-fit" title="Làm mới">
+          <RefreshCw size={13} className={loading ? "animate-spin" : ""} /> Refresh
         </button>
       </div>
 
-      {/* Search */}
-      <div className="relative mb-6 max-w-sm">
-        <Search size={13} className="absolute left-3 top-1/2 -translate-y-1/2 text-text2" />
-        <input
-          className="input pl-8 text-sm"
-          placeholder="Tìm báo cáo..."
-          value={search}
-          onChange={e => setSearch(e.target.value)}
-        />
+      <div className="mb-6 rounded-lg border border-border bg-[var(--surface-container)] p-4 shadow-sm">
+        <div className="grid gap-3 lg:grid-cols-[minmax(0,1fr)_auto] lg:items-end">
+          <label className="block">
+            <span className="mb-1.5 block text-xs font-bold text-text">Yêu cầu báo cáo</span>
+            <textarea
+              className="input min-h-[78px] resize-none text-sm leading-relaxed"
+              value={query}
+              onChange={(event) => setQuery(event.target.value)}
+              placeholder="Nhập yêu cầu phân tích..."
+            />
+          </label>
+          <button
+            type="button"
+            onClick={generateReport}
+            disabled={creating}
+            className="btn btn-primary h-11 px-5 text-sm"
+          >
+            {creating ? <Loader2 size={15} className="animate-spin" /> : <Sparkles size={15} />}
+            Tạo Report
+          </button>
+        </div>
       </div>
 
-      {/* Content */}
-      {loading ? (
-        <div className="flex items-center justify-center h-40">
-          <RefreshCw size={24} className="text-accent animate-spin" />
-        </div>
-      ) : filtered.length === 0 ? (
-        <div className="flex flex-col items-center justify-center h-40 gap-3">
-          <FileText size={32} className="text-text2/40" />
-          {reports.length === 0 ? (
-            <>
-              <p className="text-sm text-text2">Chưa có báo cáo nào.</p>
-              <p className="text-xs text-text2/60 max-w-xs text-center">
-                Tạo bảng từ Chat AI (ấn nút Excel). Tính năng tạo báo cáo: Coming soon.
-              </p>
-            </>
-          ) : (
-            <p className="text-sm text-text2">Không tìm thấy kết quả</p>
-          )}
-        </div>
-      ) : (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-          {filtered.map(r => (
-            <ReportCard
-              key={r.id}
-              r={r}
-              onDownload={() => api.reportDownload(r.id)}
+      <div className="grid gap-6 xl:grid-cols-[380px_minmax(0,1fr)]">
+        <aside className="space-y-4">
+          <div className="relative">
+            <Search size={13} className="absolute left-3 top-1/2 -translate-y-1/2 text-text2" />
+            <input
+              className="input pl-8 text-sm"
+              placeholder="Tìm báo cáo..."
+              value={search}
+              onChange={(event) => setSearch(event.target.value)}
             />
-          ))}
-        </div>
-      )}
+          </div>
+
+          {loading ? (
+            <div className="flex h-44 items-center justify-center rounded-lg border border-border bg-[var(--surface-container)]">
+              <Loader2 size={22} className="animate-spin text-accent" />
+            </div>
+          ) : filtered.length === 0 ? (
+            <div className="flex h-44 flex-col items-center justify-center rounded-lg border border-dashed border-border bg-[var(--surface-container-low)] text-center">
+              <FileText size={28} className="text-text2/45" />
+              <p className="mt-2 text-sm text-text2">Chưa có báo cáo phù hợp.</p>
+            </div>
+          ) : (
+            <div className="space-y-3">
+              {filtered.map((report) => (
+                <ReportCard
+                  key={report.id}
+                  report={report}
+                  active={selected?.id === report.id}
+                  onPreview={() => openReport(report)}
+                />
+              ))}
+            </div>
+          )}
+        </aside>
+
+        <section className="min-w-0 rounded-lg border border-border bg-[var(--surface-container)] p-4 shadow-sm">
+          <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+            <div>
+              <p className="text-xs font-bold uppercase tracking-[0.08em] text-accent">Preview</p>
+              <h2 className="mt-1 text-lg font-bold text-text">
+                {selected?.title || "Chọn hoặc tạo một báo cáo"}
+              </h2>
+              {selected?.query && (
+                <p className="mt-1 max-w-3xl text-xs leading-relaxed text-text2">{selected.query}</p>
+              )}
+            </div>
+            {selected && (
+              <a
+                className="btn btn-primary text-xs py-1.5 px-3 w-fit"
+                href={api.reportDownloadUrl(selected.id)}
+                target="_blank"
+                rel="noreferrer"
+              >
+                <Download size={12} /> Download PDF
+              </a>
+            )}
+          </div>
+
+          {previewLoading ? (
+            <div className="flex h-[520px] items-center justify-center rounded-lg border border-border bg-[var(--surface-container-low)]">
+              <Loader2 size={24} className="animate-spin text-accent" />
+            </div>
+          ) : selected ? (
+            <ReportHtmlViewer html={selectedHtml || selected.html} charts={selectedCharts} />
+          ) : (
+            <div className="flex h-[520px] flex-col items-center justify-center rounded-lg border border-dashed border-border bg-[var(--surface-container-low)] text-center">
+              <FileText size={34} className="text-text2/45" />
+              <p className="mt-3 text-sm text-text2">Tạo report mới để xem phân tích HTML và biểu đồ.</p>
+            </div>
+          )}
+        </section>
+      </div>
     </div>
   );
 }

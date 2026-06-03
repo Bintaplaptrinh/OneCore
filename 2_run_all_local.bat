@@ -3,7 +3,7 @@ setlocal EnableExtensions
 cd /d "%~dp0"
 
 echo ================================================
-echo LeadsMap local run
+echo CoreOne local run
 echo ================================================
 echo.
 
@@ -40,8 +40,8 @@ if not exist "app\frontend\node_modules" (
 
 echo.
 echo [STEP] Starting backend and frontend in separate windows
-start "LeadsMap Backend" cmd /k "cd /d ""%~dp0app\backend"" && call ".venv\Scripts\activate.bat" && uvicorn main:app --host 0.0.0.0 --port 8000 --reload"
-start "LeadsMap Frontend" cmd /k "cd /d ""%~dp0app\frontend"" && npm run dev"
+start "CoreOne Backend" cmd /k "cd /d ""%~dp0app\backend"" && call ".venv\Scripts\activate.bat" && uvicorn main:app --host 0.0.0.0 --port 8000 --reload"
+start "CoreOne Frontend" cmd /k "cd /d ""%~dp0app\frontend"" && npm run dev"
 
 echo.
 echo [RUNNING] Frontend http://localhost:3000

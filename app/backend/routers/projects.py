@@ -18,10 +18,13 @@ from core.database import (
     get_contact_by_slug,
     get_graph_data,
     get_project_by_slug,
+    get_report,
+    get_reports,
     get_stats,
     search_contacts,
     search_projects,
 )
+from core.report_agent import generate_agent_report, html_to_pdf
 from models.project import ContactsResponse, Project, ProjectsResponse, StatsResponse
 
 router = APIRouter()
@@ -674,6 +677,95 @@ async def save_flexible_query(payload: dict = Body(...)):
         "skipped": skipped,
         "errors": errors[:10],
     }
+
+
+def _reports_root() -> Path:
+    return Path(__file__).resolve().parents[1] / "reports"
+
+
+def _safe_report_path(raw_path: str) -> Path:
+    root = _reports_root().resolve()
+    path = Path(raw_path)
+    if not path.is_absolute():
+        path = root / path
+    resolved = path.resolve()
+    if not str(resolved).lower().startswith(str(root).lower()):
+        raise HTTPException(403, "Invalid report path")
+    return resolved
+
+
+def _report_to_frontend(doc: dict) -> dict:
+    file_path = str(doc.get("file_path") or "")
+    created_at = str(doc.get("created_at") or doc.get("timestamp") or "")
+    suffix = Path(file_path).suffix.lower()
+    return {
+        "id": str(doc.get("id") or ""),
+        "title": str(doc.get("title") or "Báo cáo"),
+        "file_path": file_path,
+        "query": str(doc.get("query") or ""),
+        "timestamp": created_at,
+        "kind": "html" if suffix == ".html" else ("pdf" if suffix == ".pdf" else "excel"),
+        "html_available": suffix == ".html",
+    }
+
+
+@router.get("/reports")
+async def reports():
+    """List saved reports."""
+    items = await get_reports()
+    return {"data": [_report_to_frontend(item) for item in items]}
+
+
+@router.post("/reports/agent")
+async def create_agent_report(payload: dict = Body(...)):
+    """Generate a Vietnamese Agent report with HTML preview and PDF export."""
+    query = str(payload.get("query") or "").strip()
+    language = str(payload.get("language") or "vi").strip() or "vi"
+    report = await generate_agent_report(query=query, language=language)
+    return {"success": True, "report": report}
+
+
+@router.get("/reports/{report_id}/html")
+async def report_html(report_id: str):
+    """Return stored HTML for preview."""
+    report = await get_report(report_id)
+    if not report:
+        raise HTTPException(404, "Report not found")
+    path = _safe_report_path(str(report.get("file_path") or ""))
+    if path.suffix.lower() != ".html" or not path.exists():
+        raise HTTPException(404, "HTML preview is not available")
+    return {"html": path.read_text(encoding="utf-8"), "report": _report_to_frontend(report)}
+
+
+@router.get("/reports/{report_id}/download")
+async def report_download(report_id: str):
+    """Download a saved report. HTML Agent reports are exported as PDF."""
+    report = await get_report(report_id)
+    if not report:
+        raise HTTPException(404, "Report not found")
+    path = _safe_report_path(str(report.get("file_path") or ""))
+    if not path.exists():
+        raise HTTPException(404, "Report file not found")
+
+    download_path = path
+    media_type = "application/octet-stream"
+    if path.suffix.lower() == ".html":
+        pdf_path = path.with_suffix(".pdf")
+        if not pdf_path.exists():
+            html_text = path.read_text(encoding="utf-8")
+            html_to_pdf(html_text, pdf_path)
+        download_path = pdf_path
+        media_type = "application/pdf"
+    elif path.suffix.lower() == ".pdf":
+        media_type = "application/pdf"
+    elif path.suffix.lower() == ".xlsx":
+        media_type = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+
+    return FileResponse(
+        str(download_path),
+        media_type=media_type,
+        filename=download_path.name,
+    )
 
 
 @router.post("/projects/{slug}/summary")

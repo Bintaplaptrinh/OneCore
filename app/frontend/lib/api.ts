@@ -52,12 +52,27 @@ export interface MutateExecuteResponse {
   message: string;
   entity_key?: string | null;
 }
+export interface ReportChartSpec {
+  id: string;
+  title: string;
+  type: "bar" | "line" | "pie";
+  data: { label: string; value: number }[];
+}
+export interface AgentReport {
+  id: string;
+  title: string;
+  summary: string;
+  html: string;
+  charts: ReportChartSpec[];
+  download_url?: string;
+}
 export interface ChatResponse {
   answer: string;
   citations: Citation[];
   context_used: number;
   graph_filter?: GraphFilter | null;
   pending_mutation?: PendingMutation | null;
+  report?: AgentReport | null;
 }
 export interface QueryLog {
   id: number; query: string; answer: string;
@@ -69,6 +84,7 @@ export interface ChatSessionMessage {
   citations?: Citation[];
   context_used?: number;
   graph_filter?: GraphFilter | null;
+  report?: AgentReport | null;
 }
 export interface ChatSessionSummary {
   id: string;
@@ -85,8 +101,12 @@ export interface ChatSession {
   messages: ChatSessionMessage[];
 }
 export interface Report {
-  id: number; title: string; file_path: string;
+  id: string; title: string; file_path: string;
   query: string; timestamp: string;
+  kind?: "html" | "pdf" | "excel";
+  html_available?: boolean;
+  html?: string;
+  charts?: ReportChartSpec[];
 }
 export interface FieldDef { key: string; label: string; }
 export interface FieldsResponse { projects: FieldDef[]; contacts: FieldDef[]; }
@@ -205,7 +225,7 @@ export const api = {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ query, history, style }),
     }).then(r => r.json()) as Promise<ChatResponse>,
-  exportTable: (headers: string[], rows: string[][], title = "LeadsMap") => {
+  exportTable: (headers: string[], rows: string[][], title = "CoreOne") => {
     fetch(`${API}/api/export/table`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -248,13 +268,22 @@ export const api = {
     fetch(`${API}/api/chat/sessions/${id}`, { method: "DELETE" }).then(r => r.json()) as Promise<{ success: boolean }>,
   // Reports vault
   reports: () => get<{ data: Report[] }>("/api/reports", undefined, { ttlMs: 10_000 }),
-  reportDownload: (id: number) =>
+  reportDownloadUrl: (id: string) => `${API}/api/reports/${id}/download`,
+  reportHtml: (id: string) =>
+    get<{ html: string; report: Report }>(`/api/reports/${id}/html`),
+  createAgentReport: (query: string, language = "vi") =>
+    fetch(`${API}/api/reports/agent`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ query, language }),
+    }).then(r => r.json()) as Promise<{ success: boolean; report: AgentReport }>,
+  reportDownload: (id: string) =>
     window.open(`${API}/api/reports/${id}/download`, "_blank"),
   // Project summary
   projectSummary: (slug: string) =>
     fetch(`${API}/api/projects/${slug}/summary`, { method: "POST" })
       .then(r => r.json()) as Promise<{ summary: string; report_id: number | null; project: string }>,
-  // Table Builder
+  // Data Manager
   fields: () => get<FieldsResponse>("/api/fields", undefined, { ttlMs: 60_000 }),
   query: (payload: {
     source: "projects" | "contacts";

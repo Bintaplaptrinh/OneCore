@@ -1,4 +1,4 @@
-"""HaiVo LeadsMap — FastAPI Backend."""
+"""Bintaplaptrinh CoreOne FastAPI backend."""
 from contextlib import asynccontextmanager
 
 from pathlib import Path
@@ -20,11 +20,11 @@ async def lifespan(app: FastAPI):
     await init_db()
     print("[startup] MongoDB connected and indexes created")
     yield
-    print("[shutdown] LeadsMap backend stopped")
+    print("[shutdown] CoreOne backend stopped")
 
 
 app = FastAPI(
-    title="HaiVo LeadsMap API",
+    title="Bintaplaptrinh CoreOne API",
     version="2.0.0",
     lifespan=lifespan,
 )
@@ -56,7 +56,7 @@ app.include_router(upload_router, prefix="/api", tags=["Upload"])
 
 @app.get("/")
 def root():
-    return {"status": "ok", "service": "HaiVo LeadsMap API", "version": "2.0.0"}
+    return {"status": "ok", "service": "Bintaplaptrinh CoreOne API", "version": "2.0.0"}
 
 
 @app.get("/health")

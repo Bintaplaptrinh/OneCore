@@ -3,6 +3,7 @@ import { useState, useRef, useEffect, useMemo } from "react";
 import Link from "next/link";
 import {
   api,
+  AgentReport,
   invalidateGraphCache,
   ChatResponse,
   ChatSessionMessage,
@@ -11,11 +12,12 @@ import {
   GraphFilter,
   PendingMutation,
 } from "@/lib/api";
+import ReportHtmlViewer from "@/components/ReportHtmlViewer";
 import { FileSpreadsheet } from "lucide-react";
 import {
   MessageSquare, Send, Sparkles, Database, Network, Download,
   X, History, ChevronLeft, BarChart2, Copy, Check,
-  Plus, Pencil, Trash2, AlertCircle, Loader2, CheckCircle2,
+  Plus, Pencil, Trash2, AlertCircle, Loader2, CheckCircle2, FileText,
 } from "lucide-react";
 import {
   BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Cell,
@@ -29,6 +31,7 @@ interface Message {
   graphFilter?: GraphFilter | null;
   loading?: boolean;
   pendingMutation?: PendingMutation | null;
+  report?: AgentReport | null;
 }
 
 function looksLikeMutationQuery(query: string): boolean {
@@ -134,7 +137,7 @@ function downloadCSV(data: { headers: string[]; rows: string[][] }) {
   const blob = new Blob(["\uFEFF" + csv], { type: "text/csv;charset=utf-8;" });
   const url = URL.createObjectURL(blob);
   const a = document.createElement("a");
-  a.href = url; a.download = "leadsmap_data.csv"; a.click();
+  a.href = url; a.download = "coreone_data.csv"; a.click();
   URL.revokeObjectURL(url);
 }
 
@@ -900,6 +903,44 @@ function GraphFilterNotice({
 }
 
 // ── Message bubble ────────────────────────────────────────────────────────────
+function GeneratedReportCard({ report }: { report: AgentReport }) {
+  const downloadUrl = report.id ? api.reportDownloadUrl(report.id) : report.download_url;
+
+  return (
+    <div className="mt-2 ml-1 rounded-lg border border-accent/20 bg-[var(--surface-container-low)] p-3 shadow-sm">
+      <div className="flex items-start justify-between gap-3 mb-3">
+        <div className="min-w-0">
+          <p className="text-sm font-bold text-text flex items-center gap-2">
+            <FileText size={14} className="text-accent flex-shrink-0" />
+            <span className="truncate">{report.title || "Báo cáo phân tích"}</span>
+          </p>
+          {report.summary && (
+            <p className="text-[12px] text-text2 mt-1 leading-relaxed">{report.summary}</p>
+          )}
+        </div>
+        {downloadUrl && (
+          <a
+            className="btn btn-primary text-xs py-1.5 px-3 flex-shrink-0"
+            href={downloadUrl}
+            target="_blank"
+            rel="noreferrer"
+          >
+            <Download size={12} /> PDF
+          </a>
+        )}
+      </div>
+
+      <ReportHtmlViewer html={report.html} charts={report.charts || []} compact />
+
+      <div className="mt-2 flex justify-end">
+        <Link href="/reports" className="text-[11px] text-accent hover:underline">
+          Mở trong Reports
+        </Link>
+      </div>
+    </div>
+  );
+}
+
 function MessageBubble({ msg }: { msg: Message }) {
   const hasMarkdownTable = useMemo(() => !!parseMarkdownTable(msg.content || ""), [msg.content]);
 
@@ -930,6 +971,10 @@ function MessageBubble({ msg }: { msg: Message }) {
 
         {msg.pendingMutation && (
           <MutationCard mutation={msg.pendingMutation} />
+        )}
+
+        {msg.report && (
+          <GeneratedReportCard report={msg.report} />
         )}
 
         {!hasMarkdownTable && msg.graphFilter && (msg.graphFilter.province || msg.graphFilter.developer || (msg.graphFilter.types?.length ?? 0) > 0) && (
@@ -968,6 +1013,7 @@ function serializeMessages(messages: Message[]): ChatSessionMessage[] {
       citations: m.citations,
       context_used: m.contextUsed,
       graph_filter: m.graphFilter,
+      report: m.report,
     }));
 }
 
@@ -978,6 +1024,7 @@ function deserializeMessages(messages: ChatSessionMessage[]): Message[] {
     citations: m.citations,
     contextUsed: m.context_used,
     graphFilter: m.graph_filter,
+    report: m.report,
   }));
 }
 
@@ -1167,6 +1214,7 @@ export default function ChatPage() {
         contextUsed: res.context_used,
         graphFilter: res.graph_filter,
         pendingMutation: res.pending_mutation ?? null,
+        report: res.report ?? null,
       };
       const finalMessages = [...baseMessages, aiMessage];
       setMessages(finalMessages);
